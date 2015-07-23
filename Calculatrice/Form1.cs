@@ -12,13 +12,25 @@ namespace Calculatrice
 {
     public partial class frmCalculatrice : Form
     {
+        public Graphics graphique;
+
+        public enum RoundedCorners
+        {
+            None = 0x00,
+            TopLeft = 0x02,
+            TopRight = 0x04,
+            BottomLeft = 0x08,
+            BottomRight = 0x10,
+            All = 0x1F
+        }
+
         public frmCalculatrice()
         {
             InitializeComponent();
-
             btnShift.Paint += new System.Windows.Forms.PaintEventHandler(this.roundButton_Paint);
         }
 
+        
         private void roundButton_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
 
@@ -30,7 +42,7 @@ namespace Calculatrice
             System.Drawing.Rectangle newRectangle = btnShift.ClientRectangle;
 
             // Decrease the size of the rectangle.
-            newRectangle.Inflate(-10, -10);
+            newRectangle.Inflate(-2, -2);
 
             // Draw the button's border.
             e.Graphics.DrawEllipse(System.Drawing.Pens.Black, newRectangle);
