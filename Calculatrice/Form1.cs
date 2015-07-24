@@ -27,7 +27,7 @@ namespace Calculatrice
         public frmCalculatrice()
         {
             InitializeComponent();
-            btnShift.Paint += new System.Windows.Forms.PaintEventHandler(this.roundButton_Paint);
+            btnSin.Paint += new System.Windows.Forms.PaintEventHandler(this.roundButton_Paint);
         }
 
         
@@ -39,7 +39,7 @@ namespace Calculatrice
 
             // Set a new rectangle to the same size as the button's  
             // ClientRectangle property.
-            System.Drawing.Rectangle newRectangle = btnShift.ClientRectangle;
+            System.Drawing.Rectangle newRectangle = btnSin.ClientRectangle;
 
             // Decrease the size of the rectangle.
             newRectangle.Inflate(-2, -2);
@@ -55,8 +55,9 @@ namespace Calculatrice
 
             // Set the button's Region property to the newly created  
             // circle region.
-            btnShift.Region = new System.Drawing.Region(buttonPath);
+            btnSin.Region = new System.Drawing.Region(buttonPath);
 
         }
+
     }
 }
