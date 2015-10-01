@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Calculatrice
 {
     class controleurCalculatrice
     {
         private frmCalculatrice mFenetre;
-
-        private List<Operation.Operation> liste_operations;
-        private List<Operation.Operation> liste_op_historique;
-        //private Operande.Operande dernierResultat;
-
-        private Decimal resultat;
+        private List<Operation> liste_op_historique;
+        private Double resultat;
 
         public controleurCalculatrice(frmCalculatrice fenetre)
         {
@@ -27,27 +21,12 @@ namespace Calculatrice
             mFenetre.recupererTxtCtrl("Resultat").Text = "";
         }
 
-        public Decimal recupererDernierResultat()
+        public Double recupererDernierResultat()
         {
             return this.resultat;
         }
 
-        public void emplilerOperation()
-        {
-
-        }
-
-        public void depilerOperation()
-        {
-
-        }
-
-        public void calculer()
-        {
-
-        }
-
-        public void memoriserResultat(Decimal pResultat)
+        public void memoriserResultat(Double pResultat)
         {
             this.resultat = pResultat;
         }
@@ -71,8 +50,8 @@ namespace Calculatrice
 
             return lRetour;
         }
-
-        public Decimal parserCalcul(String pOperations)
+       /*
+        public Double parserCalcul(String pOperations)
         {
             //on a besoin d'une opération pour parser.
             if( pOperations.Length == 0)
@@ -114,13 +93,58 @@ namespace Calculatrice
                     }
                     else
                     {
-                        lObjet = new Operation.Operation();
-                        lObjet.Operande1 = new Operande.Operande(Decimal.Parse(lNombre));
+                        if (lNombre.Length > 0) {
 
-                        lNombre = "";
+                            if (lObjet != null)
+                            {
+                                if (lObjet.Operande1 != null)
+                                {
+                                    lObjet.Operande2 = new Operande.Operande(Decimal.Parse(lNombre));
+                                }
+                                else
+                                {
+                                    lObjet.Operande1 = new Operande.Operande(Decimal.Parse(lNombre));
+                                }
+                            }
+                            else
+                            {
+                                lObjet = new Operation.Operation();
+                                lObjet.Operande1 = new Operande.Operande(Decimal.Parse(lNombre));
+                                lListe.Add(lObjet);
+                            }
+
+                            lNombre = "";
+                        }
+
+                        if( lObjet.Operande2 != null)
+                        {
+                            if( lListe.Count() > 0)
+                            {
+                                lObjet = new Operation.Operation();
+                                lObjet.Precedente = lListe[lListe.Count()];
+                                lListe[lListe.Count()].Suivante = lObjet;
+
+                                lListe.Add(lObjet);
+                            }
+                        }
+
+                        //on stock l'opérateur
                         lAlpha += lOperation[i].ToString();
-                    }
-                }
+                        lObjet.Operateur = retrouverOperateur(lAlpha);
+
+                        if (lObjet.Operateur != null) {
+                            //on regarde si l'opération précédente à une priorité supérieur    
+                            if (lListe.Count() > 0) {
+                                if (lObjet.Precedente.Operateur.Priorite < lObjet.Operateur.Priorite)
+                                {
+                                    lObjet.Operande1 = lObjet.Precedente.Operande2;
+                                    lObjet.Precedente.Operande2 = lObjet.va
+                                }
+                            }
+                        }
+
+                    } //fin else
+                } //fin for
 
                 if( lObjet.Operande2 == null)
                 {
@@ -144,80 +168,12 @@ namespace Calculatrice
             return lRetour;
 
         }
-
-        private Operateur.Operateur retrouverOperateur(String pChaine)
+        */
+        public Double calculer(String pCalcul)
         {
-            Operateur.Operateur lRetour = null;
-            String lChaine = "";
-
-            lChaine = pChaine;
-
-            switch (lChaine)
-            {
-                case "+":
-                    lRetour = new Operateur.Adition();
-                       break;
-                case "-":
-                    lRetour = new Operateur.Soustraction();
-                    break;
-
-                case "*":
-                    lRetour = new Operateur.Multiplication();
-                    break;
-
-                case "/":
-                    lRetour = new Operateur.Division();
-                    break;
-
-                case "sin":
-                    lRetour = new Operateur.Sinus(mFenetre.recupererTxtCtrl("Mode").Text);
-                    break;
-
-                case "cos":
-                    lRetour = new Operateur.Cosinus(mFenetre.recupererTxtCtrl("Mode").Text);
-                    break;
-
-                case "tan":
-                    lRetour = new Operateur.Tangente(mFenetre.recupererTxtCtrl("Mode").Text);
-                    break;
-
-                case "log":
-                    lRetour = new Operateur.Log("10");
-                    break;
-
-                case "ln":
-                    lRetour = new Operateur.Log("e");
-                    break;
-
-                case "^2":
-                    lRetour = new Operateur.Puissance(2);
-                    break;
-
-                case "^3":
-                    lRetour = new Operateur.Puissance(3);
-                    break;
-
-                case "^":
-                    lRetour = new Operateur.Puissance();
-                    break;
-
-                case "e^":
-                    lRetour = new Operateur.Exp();
-                    break;
-
-                case "sqrt":
-                    lRetour = new Operateur.Racine();
-                    break;
-
-                case "fact":
-                    lRetour = new Operateur.Factorielle();
-                    break;
-
-                default:
-                    break;
-            }
-
-            return lRetour;
+            Calculateur calcul = new Calculateur();
+            return calcul.calculerOperation(pCalcul);
+            
         }
     }
 }

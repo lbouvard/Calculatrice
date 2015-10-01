@@ -4,30 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Operateur
+namespace Calculatrice
 {
     public abstract class Operateur
     {
         public int Priorite { get; set; }
 
-        abstract public Operande.Operande calculer(Operande.Operande op1, Operande.Operande op2);
+        abstract public Operande calculer(Operande op1, Operande op2);
     }
 
-    public class Adition : Operateur
+    public class Addition : Operateur
     {
-        public Adition()
+        public Addition()
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2)
+        public override Operande calculer(Operande pOp1, Operande pOp2)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
-            lResultat = pOp1.Valeur + pOp2.Valeur;
+            lResultat = Double.Parse(pOp1.Valeur) + Double.Parse(pOp2.Valeur);
 
-            lRetour = new Operande.Operande(lResultat);
+            lRetour = new Operande(lResultat.ToString("G17"));
 
             return lRetour;
         }
@@ -37,17 +37,17 @@ namespace Operateur
     {
         public Soustraction()
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2)
+        public override Operande calculer(Operande pOp1, Operande pOp2)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
-            lResultat = pOp1.Valeur - pOp2.Valeur;
+            lResultat = Double.Parse(pOp1.Valeur) - Double.Parse(pOp2.Valeur);
 
-            lRetour = new Operande.Operande(lResultat);
+            lRetour = new Operande(lResultat.ToString("G17"));
 
             return lRetour;
         }
@@ -57,17 +57,17 @@ namespace Operateur
     {
         public Multiplication()
         {
-            this.Priorite = 2;
+            this.Priorite = 1;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2)
+        public override Operande calculer(Operande pOp1, Operande pOp2)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
-            lResultat = pOp1.Valeur * pOp2.Valeur;
+            lResultat = Double.Parse(pOp1.Valeur) * Double.Parse(pOp2.Valeur);
 
-            lRetour = new Operande.Operande(lResultat);
+            lRetour = new Operande(lResultat.ToString("G17"));
 
             return lRetour;
         }
@@ -78,21 +78,22 @@ namespace Operateur
     {
         public Division()
         {
-            this.Priorite = 2;
+            this.Priorite = 1;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2)
+        public override Operande calculer(Operande pOp1, Operande pOp2)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
             try
             {
-                lResultat = pOp1.Valeur / pOp2.Valeur;
-                lRetour = new Operande.Operande(lResultat);
+                lResultat = Double.Parse(pOp1.Valeur) / Double.Parse(pOp2.Valeur);
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch(DivideByZeroException ex)
             {
+                Console.WriteLine(ex.Message);
                 throw new Exception("Division par zéro impossible");
             }
             catch(Exception ex)
@@ -113,27 +114,27 @@ namespace Operateur
 
         public Puissance(int pDegre = 2)
         {
-            this.Priorite = 3;
+            this.Priorite = 1;
             this.mDegre = pDegre;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
             try
             {
                 if (pOp2 != null)
                 {
-                    lResultat = (Decimal)Math.Pow((double)pOp1.Valeur, (double)pOp2.Valeur);
+                    lResultat = (Double)Math.Pow(Double.Parse(pOp1.Valeur), (double)Double.Parse(pOp2.Valeur));
                 }
                 else
                 {
-                    lResultat = (Decimal)Math.Pow((double)pOp1.Valeur, mDegre);
+                    lResultat = (Double)Math.Pow(Double.Parse(pOp1.Valeur), mDegre);
                 }
                  
-                lRetour = new Operande.Operande(lResultat);
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {
@@ -151,36 +152,30 @@ namespace Operateur
 
         public Cosinus(String unite)
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
             this.mUnite = unite;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
-            double lOperande = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
+            Double lOperande = 0;
 
             try
             {
                 if( mUnite == "Deg")
                 {
-                    lOperande = (double)pOp1.Valeur * (double)(Math.PI / 180);
+                    lOperande = Double.Parse(pOp1.Valeur) * (Math.PI / 180);
                 }
                 else
                 {
-                    lOperande = (double)pOp1.Valeur;
+                    lOperande = Double.Parse(pOp1.Valeur);
                 }
 
-                lResultat = (Decimal)Math.Cos(lOperande);
+                lResultat = Math.Cos(lOperande);
 
-
-                if( mUnite == "Deg")
-                {
-                    lResultat = (Decimal)(((double)lResultat * 180) / Math.PI);
-                }
-
-                lRetour = new Operande.Operande(lResultat);
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {
@@ -199,36 +194,30 @@ namespace Operateur
 
         public Sinus(String unite)
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
             this.mUnite = unite;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
-            double lOperande = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
+            Double lOperande = 0;
 
             try
             {
                 if (mUnite == "Deg")
                 {
-                    lOperande = (double)pOp1.Valeur * (double)(Math.PI / 180);
+                    lOperande = Double.Parse(pOp1.Valeur) * (Math.PI / 180);
                 }
                 else
                 {
-                    lOperande = (double)pOp1.Valeur;
+                    lOperande = Double.Parse(pOp1.Valeur);
                 }
 
-                lResultat = (Decimal)Math.Sin(lOperande);
+                lResultat = Math.Sin(lOperande);
 
-
-                if (mUnite == "Deg")
-                {
-                    lResultat = (Decimal)(((double)lResultat * 180) / Math.PI);
-                }
-
-                lRetour = new Operande.Operande(lResultat);
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {
@@ -247,36 +236,30 @@ namespace Operateur
 
         public Tangente(String unite)
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
             this.mUnite = unite;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
-            double lOperande = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
+            Double lOperande = 0;
 
             try
             {
                 if (mUnite == "Deg")
                 {
-                    lOperande = (double)pOp1.Valeur * (double)(Math.PI / 180);
+                    lOperande = Double.Parse(pOp1.Valeur) * (Math.PI / 180);
                 }
                 else
                 {
-                    lOperande = (double)pOp1.Valeur;
+                    lOperande = Double.Parse(pOp1.Valeur);
                 }
 
-                lResultat = (Decimal)Math.Tan(lOperande);
+                lResultat = Math.Tan(lOperande);
 
-
-                if (mUnite == "Deg")
-                {
-                    lResultat = (Decimal)(((double)lResultat * 180) / Math.PI);
-                }
-
-                lRetour = new Operande.Operande(lResultat);
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {
@@ -296,26 +279,26 @@ namespace Operateur
         public Log(String pDegre)
         {
             this.mDegre = pDegre;
-            this.Priorite = 1;
+            this.Priorite = 0;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
             try
             {
                 if( mDegre == "e")
                 {
-                    lResultat = (Decimal)Math.Log((double)pOp1.Valeur);
+                    lResultat = Math.Log(Double.Parse(pOp1.Valeur));
                 }
                 else if( mDegre == "10")
                 {
-                    lResultat = (Decimal)Math.Log10((double)pOp1.Valeur);
+                    lResultat = Math.Log10(Double.Parse(pOp1.Valeur));
                 }
                 
-                lRetour = new Operande.Operande(lResultat);
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {
@@ -331,18 +314,18 @@ namespace Operateur
     {
         public Racine()
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
             try
             {
-                lResultat = (Decimal)Math.Sqrt((double)pOp1.Valeur); 
-                lRetour = new Operande.Operande(lResultat);
+                lResultat = Math.Sqrt(Double.Parse(pOp1.Valeur)); 
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {
@@ -358,18 +341,18 @@ namespace Operateur
     {
         public Exp()
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
             try
             {
-                lResultat = (Decimal)Math.Exp((double)pOp1.Valeur);
-                lRetour = new Operande.Operande(lResultat);
+                lResultat = Math.Pow(Math.E, Double.Parse(pOp1.Valeur));
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {
@@ -385,18 +368,18 @@ namespace Operateur
     {
         public Factorielle()
         {
-            this.Priorite = 1;
+            this.Priorite = 0;
         }
 
-        public override Operande.Operande calculer(Operande.Operande pOp1, Operande.Operande pOp2 = null)
+        public override Operande calculer(Operande pOp1, Operande pOp2 = null)
         {
-            Operande.Operande lRetour = null;
-            Decimal lResultat = 0;
+            Operande lRetour = null;
+            Double lResultat = 0;
 
             try
             {
-                lResultat = (Decimal)calculFactorielle((double)pOp1.Valeur);
-                lRetour = new Operande.Operande(lResultat);
+                lResultat = calculFactorielle(Double.Parse(pOp1.Valeur));
+                lRetour = new Operande(lResultat.ToString("G17"));
             }
             catch (Exception ex)
             {

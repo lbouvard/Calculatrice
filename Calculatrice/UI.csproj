@@ -46,17 +46,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="calculatriceUI.cs">
+    <Compile Include="UI.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="calculatriceUI.Designer.cs">
-      <DependentUpon>calculatriceUI.cs</DependentUpon>
+    <Compile Include="UI.Designer.cs">
+      <DependentUpon>UI.cs</DependentUpon>
     </Compile>
     <Compile Include="controleurCalculatrice.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="calculatriceUI.resx">
-      <DependentUpon>calculatriceUI.cs</DependentUpon>
+    <EmbeddedResource Include="UI.resx">
+      <DependentUpon>UI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -81,6 +81,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Calculateur\Calculateur.csproj">
+      <Project>{3b1295d0-43d4-4951-967f-f4fed3c8f2a0}</Project>
+      <Name>Calculateur</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Operande\Operande.csproj">
       <Project>{1bab035d-fd75-4ace-9b47-35190cb73d14}</Project>
       <Name>Operande</Name>

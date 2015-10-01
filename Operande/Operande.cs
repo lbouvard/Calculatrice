@@ -1,34 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Operande
+namespace Calculatrice
 {
     public class Operande
     {
+
+        public String Valeur { get; set; }
+
         public Operande()
         {
-            Valeur = 0;
+            Valeur = "";
         }
 
-        public Operande(Decimal pValeur)
+        public Operande(String pValeur)
         {
-            Valeur = pValeur;
+            this.Valeur = pValeur;
         }
 
         void rendreNegatif()
         {
-            this.Valeur *= -1;
+            this.Valeur = "-" + this.Valeur;
         }
 
         void rendrePositif()
         {
-            this.Valeur *= 1;
+            this.Valeur = this.Valeur.Replace("-", "");
         }
 
-        public Decimal Valeur { get; private set; }
+
 
     }
 }

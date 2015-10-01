@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatriceUI", "Calculatrice\CalculatriceUI.csproj", "{8194D08C-D045-43D4-B9C9-5048DC5D7445}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "Calculatrice\UI.csproj", "{8194D08C-D045-43D4-B9C9-5048DC5D7445}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Operateur", "Operateur\Operateur.csproj", "{32AA8CD1-2039-4705-885A-3CB7302220F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Operande", "Operande\Operande.csproj", "{1BAB035D-FD75-4ACE-9B47-35190CB73D14}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Operation", "Operation\Operation.csproj", "{50811DCB-E089-4BEF-83C8-F6D932261CC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUnitaire", "TestUnitaire\TestUnitaire.csproj", "{B66D0ECB-28A4-4E94-8FCE-1FABF613789E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calculateur", "Calculateur\Calculateur.csproj", "{3B1295D0-43D4-4951-967F-F4FED3C8F2A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{50811DCB-E089-4BEF-83C8-F6D932261CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50811DCB-E089-4BEF-83C8-F6D932261CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50811DCB-E089-4BEF-83C8-F6D932261CC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B66D0ECB-28A4-4E94-8FCE-1FABF613789E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B66D0ECB-28A4-4E94-8FCE-1FABF613789E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B66D0ECB-28A4-4E94-8FCE-1FABF613789E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B66D0ECB-28A4-4E94-8FCE-1FABF613789E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B1295D0-43D4-4951-967F-F4FED3C8F2A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B1295D0-43D4-4951-967F-F4FED3C8F2A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B1295D0-43D4-4951-967F-F4FED3C8F2A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B1295D0-43D4-4951-967F-F4FED3C8F2A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
