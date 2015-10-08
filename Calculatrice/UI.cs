@@ -17,6 +17,9 @@ namespace Calculatrice
         private controleurCalculatrice mControleur;
         private int mPositionCurseur = 0;
         private Font mPoliceInitiale;
+        private bool resultat_affiche = false;
+
+        private bool enModification = false;
         #endregion
 
         #region Constructeurs
@@ -38,7 +41,7 @@ namespace Calculatrice
 
         private void btnRetour_Click(object sender, EventArgs e)
         {
-            effacterCaractere();
+            effacerCaractere();
         }
 
         private void btnEffacerTout_Click(object sender, EventArgs e)
@@ -54,6 +57,11 @@ namespace Calculatrice
         private void txtSaisie_Click(object sender, EventArgs e)
         {
             mPositionCurseur = txtSaisie.SelectionStart;
+
+            if (mPositionCurseur == txtSaisie.Text.Length)
+                enModification = false;
+            else
+                enModification = true;
         }
 
         private void btnEgal_Click(object sender, EventArgs e)
@@ -64,13 +72,36 @@ namespace Calculatrice
             {
                 resultat = mControleur.calculer(txtSaisie.Text);
                 afficherResultat(resultat);
-                mPositionCurseur = 0;
+                mPositionCurseur = txtSaisie.Text.Length;
+
+                resultat_affiche = true;
             }
             catch(Exception ex)
             {
                 afficherErreur(ex.Message);
             }
             
+        }
+
+        private void btnTermine_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void btnAncien_Click(object sender, EventArgs e)
+        {
+            String saisie = mControleur.recupererHistorique(false);
+
+            if( saisie != "" )
+                afficherSaisieHistorique(saisie);
+        }
+
+        private void btnRecent_Click(object sender, EventArgs e)
+        {
+            String saisie = mControleur.recupererHistorique(true);
+
+            if (saisie != "")
+                afficherSaisieHistorique(saisie);
         }
 
         #endregion
@@ -108,7 +139,7 @@ namespace Calculatrice
             txtResultat.Font = mPoliceInitiale;
         }
 
-        private void effacterCaractere()
+        private void effacerCaractere()
         {
             String TexteSaisiGauche = "";
             String TexteSaisiDroite = "";
@@ -130,29 +161,48 @@ namespace Calculatrice
             }
         }
 
+        private void effacerSaisie()
+        {
+            txtSaisie.Text = "";
+        }
+
+        private void afficherSaisieHistorique(String saisie)
+        {
+            effacerSaisie();
+            txtSaisie.Text = saisie;
+        }
+
         private void afficherValeur(Object pBouton)
         {
             Button lBouton = (Button)pBouton;
 
-            if (!mControleur.estUnEntier(lBouton.Text) && txtResultat.Text.Length > 0)
+            // si resultat affiché, on prend la valeur et on l'affiche sur la saisie
+            if (!mControleur.estUnEntier(lBouton.Text) && txtResultat.Text.Length > 0 && !enModification )
             {
                 txtSaisie.Text = mControleur.recupererDernierResultat().ToString();
                 mPositionCurseur = txtSaisie.Text.Length;
+            }
+
+            // si on a un resultat affiché, on supprime le resultat
+            if (resultat_affiche)
+            {
+                resultat_affiche = false;
+                txtResultat.Text = "";
             }
 
             switch (lBouton.Name)
             {
 
                 case "btnPuissance2":
-                    ajouterTexte("^2");
+                    ajouterTexte("carre(");
                     break;
 
                 case "btnPuissance3":
-                    ajouterTexte("^3");
+                    ajouterTexte("cube(");
                     break;
 
                 case "btnPuissancen":
-                    ajouterTexte("^");
+                    ajouterTexte("^(");
                     break;
 
                 case "btnCos":
@@ -176,7 +226,7 @@ namespace Calculatrice
                     break;
 
                 case "btnExp":
-                    ajouterTexte("e^");
+                    ajouterTexte("powe(");
                     break;
 
                 case "btnRacine":
@@ -223,7 +273,7 @@ namespace Calculatrice
                     ajouterTexte("Pi");
                     break;
 
-                case "BtnDernierResultat":
+                case "btnDernierResultat":
                     ajouterTexte(mControleur.recupererDernierResultat().ToString());
                     break;
 
@@ -244,7 +294,10 @@ namespace Calculatrice
                     }
                     else
                     {
-                        ajouterTexte(" " + lBouton.Text + " ");
+                        if (lBouton.Text == ",")
+                            ajouterTexte(lBouton.Text);
+                        else
+                            ajouterTexte(" " + lBouton.Text + " ");
                     }
                     break;
             }
@@ -269,7 +322,7 @@ namespace Calculatrice
             }
         }
 
-        private void afficherErreur(String pMessage)
+        public void afficherErreur(String pMessage)
         {
             //Ecrire en plus petit
             Font lFontErreur = new Font("Microsoft Sans Serif", 10);
@@ -281,10 +334,17 @@ namespace Calculatrice
 
         private void afficherResultat(Double pResultat)
         {
-            txtResultat.Text = pResultat.ToString();
+            txtResultat.Text = pResultat.ToString("G17");
         }
 
         #endregion
 
+        private void txtSaisie_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Right && txtSaisie.SelectionStart == txtSaisie.Text.Length)
+                enModification = false;
+            else if (e.KeyData == Keys.Left)
+                enModification = true;
+        }
     }
 }

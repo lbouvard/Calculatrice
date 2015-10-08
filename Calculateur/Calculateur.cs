@@ -102,31 +102,34 @@ namespace Calculatrice
             bool numerique = true;
             bool rempli = false;
 
+            // on parcours chaque caractère
             for (int i = 0; i < donnees.Length; i++)
             {
                 c = donnees[i];
+
+                // opération complète (2 opérandes ok) et autre opération à suivre
+                if (rempli)
+                {
+                    rempli = false;
+                    suiv = new Operation();
+                    op.Suivante = suiv;
+                    suiv.Precedente = op;
+
+                    suiv.Operateur = retrouverOperateur(operateur);
+
+                    liste.Add(op);
+                    operateur = "";
+
+                    op = suiv;
+                    numerique = true;
+                }
 
                 if (char.IsDigit(c) || c == ',')
                 {
                     //si on avait un caractère sur le caractère précédent
                     if (!numerique)
                     {
-                        if (rempli)
-                        {
-                            rempli = false;
-                            suiv = new Operation();
-                            op.Suivante = suiv;
-                            suiv.Precedente = op;
-
-                            suiv.Operateur = retrouverOperateur(operateur);
-
-                            liste.Add(op);
-                            operateur = "";
-
-                            op = suiv;
-
-                        }
-                        else if (op != null && operateur != "")
+                        if (op != null && operateur != "")
                         {
                             op.Operateur = retrouverOperateur(operateur);
                             operateur = "";
@@ -144,7 +147,7 @@ namespace Calculatrice
                 {
                     int tailleOperateur = 0;
                     String operateurSpe = "";
-                    bool operateurTrouve = false;
+                    bool operateurTrouve = true;
 
                     // opérateur spécifique
                     switch (c)
@@ -155,7 +158,18 @@ namespace Calculatrice
                             {
                                 operateurSpe = "cos";
                                 tailleOperateur = 3;
-                                operateurTrouve = true;
+                            }
+                            // carre( )
+                            else if (donnees[i + 1] == 'a' && donnees[i + 2] == 'r' && donnees[i + 3] == 'r' && donnees[i + 4] == 'e')
+                            {
+                                operateurSpe = "carre";
+                                tailleOperateur = 5;
+                            }
+                            // cube( )
+                            else if (donnees[i + 1] == 'u' && donnees[i + 2] == 'b' && donnees[i + 3] == 'e')
+                            {
+                                operateurSpe = "cube";
+                                tailleOperateur = 4;
                             }
                             break;
                         case 's':
@@ -164,7 +178,12 @@ namespace Calculatrice
                             {
                                 operateurSpe = "sin";
                                 tailleOperateur = 3;
-                                operateurTrouve = true;
+                            }
+                            // racine carré
+                            else if(donnees[i + 1] == 'q' && donnees[i + 2] == 'r' && donnees[i + 3] == 't')
+                            {
+                                operateurSpe = "sqrt";
+                                tailleOperateur = 4;
                             }
                             break;
                         case 't':
@@ -173,7 +192,6 @@ namespace Calculatrice
                             {
                                 operateurSpe = "tan";
                                 tailleOperateur = 3;
-                                operateurTrouve = true;
                             }
                             break;
                         case 'l':
@@ -182,14 +200,12 @@ namespace Calculatrice
                             {
                                 operateurSpe = "ln";
                                 tailleOperateur = 2;
-                                operateurTrouve = true;
                             }
                             // logarithme base 10 log( )
                             else if (donnees[i + 1] == 'o' && donnees[i + 2] == 'g')
                             {
                                 operateurSpe = "log";
                                 tailleOperateur = 3;
-                                operateurTrouve = true;
                             }
                             break;
                         case 'f':
@@ -198,24 +214,19 @@ namespace Calculatrice
                             {
                                 operateurSpe = "fact";
                                 tailleOperateur = 4;
-                                operateurTrouve = true;
                             }
                             break;
                         case 'p':
-                            // puissance
-                            if (donnees[i + 1] == 'o' && donnees[i + 2] == 'w' && donnees[i + 3] == '(')
-                            {
-                                operateurSpe = "pow";
-                                tailleOperateur = 3;
-                                operateurTrouve = true;
-                            }
                             // puissance népériene
-                            else if (donnees[i + 1] == 'o' && donnees[i + 2] == 'w' && donnees[i + 3] == 'e')
+                            if (donnees[i + 1] == 'o' && donnees[i + 2] == 'w' && donnees[i + 3] == 'e')
                             {
                                 operateurSpe = "powe";
                                 tailleOperateur = 4;
-                                operateurTrouve = true;
                             }
+                            break;
+                        case '^':
+                            operateurSpe = "^";
+                            tailleOperateur = 1;
                             break;
                         default:
                             operateurTrouve = false;
@@ -231,7 +242,26 @@ namespace Calculatrice
                         // on retire les informations avec les parenthèses
                         donnees = donnees.Remove(i, tailleOperateur + positionFinParenthese + 2);
 
-                        resultat = calculExterne(resultat, null, retrouverOperateur(operateurSpe) );
+                        // cas de la puissance
+                        if (operateurSpe == "^")
+                        {
+                            resultat = calculExterne(operande, resultat, new Puissance());
+                            donnees = donnees.Remove(i - operande.Length, operande.Length);
+                            operande = "";
+                        }
+                        else
+                        {
+                            resultat = calculExterne(resultat, null, retrouverOperateur(operateurSpe));
+                        }
+
+                        // cas de la puissance sur une operation complexe
+                        if (i < donnees.Length)
+                        {
+                            if (donnees[i] == '^')
+                            {
+                                resultat = calculPuissance(resultat, ref donnees, i);
+                            }
+                        }
 
                         // cas ou un multiple se trouve devant l'opérateur
                         if (operande != "")
@@ -248,11 +278,28 @@ namespace Calculatrice
                         }
                         else
                         {
-                            op.Operande2 = new Operande(resultat);
-                            op.Operateur = retrouverOperateur(operateur);
-                            operateur = "";
+                            if( op.Resultat == "-")
+                            {
+                                op.Resultat += resultat;
+                                liste.Add(op);
+                            }
+                            else
+                            {
+                                op.Operande2 = new Operande(resultat);
+                                if( operateur != "")
+                                {
+                                    op.Operateur = retrouverOperateur(operateur);
+                                }
 
-                            liste.Add(op);
+                                // l'ajout de l'opération ce fera dans la prochaine itération
+                                rempli = true;
+
+                                // si y a des calcul à la suite
+                                if (donnees.Length > i)
+                                    c = donnees[i];
+
+                                operateur = "";
+                            }
                         }
 
                         numerique = false;
@@ -305,8 +352,16 @@ namespace Calculatrice
                             // on enregistre le résultat
                             op.Operande2 = new Operande(resultat);
                             // on enregistre l'opérateur de la sous opération
-                            op.Operateur = retrouverOperateur(operateur);
-                            operateur = "";
+                            if( operateur != "")
+                            {
+                                op.Operateur = retrouverOperateur(operateur);
+                                operateur = "";
+                            }
+                            else
+                            {
+                                continue;
+                            }
+
 
                             if ((op.Operande1 == null || op.Operande2 == null || donnees.Length > i + 1) && liste.Count == 0)
                             {
@@ -402,6 +457,12 @@ namespace Calculatrice
                     op.Resultat = operande;
                     liste.Add(op);
                 }
+            }
+
+            // cas de calcul complexe ou une opération à tous les éléments de rempli
+            if (rempli && !numerique && op.Operande1 != null)
+            {
+                liste.Add(op);
             }
         }
 
@@ -500,7 +561,15 @@ namespace Calculatrice
             {
                 Operation calcul = new Operation();
                 calcul.Operande1 = new Operande(operande1);
-                calcul.Operande2 = new Operande(operande2);
+
+                if (operande2 != null)
+                {
+                    calcul.Operande2 = new Operande(operande2);
+                }
+                else
+                {
+                    calcul.Operande2 = null;
+                }
                 calcul.Operateur = operateur;
 
                 return calcul.recupererResultat().Valeur;
@@ -510,6 +579,22 @@ namespace Calculatrice
                 Console.Write(ex.Message);
                 return "0";
             }
+        }
+
+        private String calculPuissance(String operande1, ref String operation, int indice)
+        {
+            String retour = "";
+
+            // on calcul par récurrence le contenu d'un couple de parenthèse
+            int positionFinParenthese = getPositionParentheseFermante(operation.Substring(indice + 2));
+            // on envoi la chaine découpée sans les parenthèses
+            retour = calculerSousOperation(operation.Substring(indice + 2, positionFinParenthese), new List<Operation>());
+            // on retire les informations avec les parenthèses
+            operation = operation.Remove(indice, positionFinParenthese + 3);
+
+            retour = calculExterne(operande1, retour, new Puissance());
+
+            return retour;
         }
 
         private int getPositionParentheseFermante(String chaine)
@@ -578,7 +663,15 @@ namespace Calculatrice
                     lRetour = new Log("e");
                     break;
 
-                case "pow":
+                case "carre":
+                    lRetour = new Puissance(2);
+                    break;
+
+                case "cube":
+                    lRetour = new Puissance(3);
+                    break;
+
+                case "^":
                     lRetour = new Puissance();
                     break;
 
@@ -600,6 +693,25 @@ namespace Calculatrice
             }
 
             return lRetour;
+        }
+
+
+        // trace à remonter au contrôleur appelant
+        public event EventHandler<TraceErreurEventArgs> TraceErreur;
+
+        protected virtual void TracerErreur(TraceErreurEventArgs e)
+        {
+            EventHandler<TraceErreurEventArgs> handler = TraceErreur;
+
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+
+        public class TraceErreurEventArgs : EventArgs
+        {
+            public String Message { get; set; }
         }
     }
 }

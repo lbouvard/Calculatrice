@@ -136,6 +136,13 @@ namespace TestUnitaire
         }
 
         [TestMethod]
+        public void TestCosinusDeg4()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(15 + (Math.Sqrt(2) / 2) * 2, calcul.calculerOperation("5 + cos(45) x 2 + 10"));
+        }
+
+        [TestMethod]
         public void TestSinusDeg()
         {
             Calculateur calcul = new Calculateur();
@@ -175,6 +182,69 @@ namespace TestUnitaire
         {
             Calculateur calcul = new Calculateur();
             Assert.AreEqual(299, calcul.calculerOperation("-1 + 50 x 6"));
+        }
+
+        [TestMethod]
+        public void TestNombreNegatif2()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(1, calcul.calculerOperation("50 x (-6) + 301"));
+        }
+
+        [TestMethod]
+        public void TestNombreNegatif3()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(-Math.Cos(Math.PI / 3), calcul.calculerOperation("-cos(60)"));
+        }
+
+        [TestMethod]
+        public void TestNombreNegatif4()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(Math.Cos(Math.PI / 3), calcul.calculerOperation("cos(-60)"));
+        }
+
+        [TestMethod]
+        public void TestNombreNegatif5()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(Math.Cos(2 * Math.PI / 3), calcul.calculerOperation("cos(120)"));
+        }
+
+        [TestMethod]
+        public void TestCarre()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(25, calcul.calculerOperation("carre(5)"));
+        }
+
+        [TestMethod]
+        public void TestCube()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(27, calcul.calculerOperation("cube(3)"));
+        }
+
+        [TestMethod]
+        public void TestPuissanceN()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(32, calcul.calculerOperation("2^(5)"));
+        }
+
+        [TestMethod]
+        public void TestCalculComplexe()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(5 + Math.Pow(Math.Sqrt(2) / 2, 4.0) + Math.Pow(5.0, 3.0) - 45, calcul.calculerOperation("5 + cos(45)^(4) + cube(25 x 2 / 10) + (-45)"));
+        }
+
+        [TestMethod]
+        public void TestGrandeValeur()
+        {
+            Calculateur calcul = new Calculateur();
+            Assert.AreEqual(Math.Pow(25, 32), calcul.calculerOperation("25 ^ (32)"));
         }
     }
 }

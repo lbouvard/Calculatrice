@@ -7,7 +7,8 @@ namespace Calculatrice
     class controleurCalculatrice
     {
         private frmCalculatrice mFenetre;
-        private List<Operation> liste_op_historique;
+        private List<String> historique;
+        private int index_historique = 0;
         private Double resultat;
 
         public controleurCalculatrice(frmCalculatrice fenetre)
@@ -19,6 +20,7 @@ namespace Calculatrice
         {
             mFenetre.recupererTxtCtrl("Saisie").Text = "";
             mFenetre.recupererTxtCtrl("Resultat").Text = "";
+            this.historique = new List<string>();
         }
 
         public Double recupererDernierResultat()
@@ -26,19 +28,33 @@ namespace Calculatrice
             return this.resultat;
         }
 
-        public void memoriserResultat(Double pResultat)
+        public void ajouterHistorique(String pCalcul)
         {
-            this.resultat = pResultat;
+            historique.Add(pCalcul);
         }
 
-        public void ajouterHistorique()
+        public String recupererHistorique(bool avance)
         {
+            String retour = "";
 
-        }
+            if (historique.Count > 0)
+            { 
+                retour = historique[index_historique];
 
-        public void gestionErreur()
-        {
+                // on avance vers l'historique le plus ancien
+                if (!avance && index_historique < historique.Count - 1)
+                {
+                    index_historique++;
+                }
+                // on avance vers l'historique le plus ancien
+                else if (avance && index_historique > 0)
+                {
+                    index_historique--;
+                }
+            }
 
+            // on retourne l'équation
+            return retour;
         }
 
         public bool estUnEntier(String pValeur)
@@ -50,130 +66,29 @@ namespace Calculatrice
 
             return lRetour;
         }
-       /*
-        public Double parserCalcul(String pOperations)
-        {
-            //on a besoin d'une opération pour parser.
-            if( pOperations.Length == 0)
-            {
-                throw new Exception("Aucune valeur disponible");
-            }
 
-            List<Operation.Operation> lListe = null;
-            String lOperation;
-            Operation.Operation lObjet = null;
-            Decimal lRetour = 0;
-            int lResultatOut = 0;
-            int lProfondeur = 0;
-
-            String lNombre = "";
-            String lAlpha = "";
-
-
-            try
-            {
-                lListe = new List<Operation.Operation>();
-                lOperation = pOperations;
-
-                //On supprimer tous les espaces.
-                lOperation = lOperation.Replace(" ", "");
-
-                //Parcours de tous les caractères de l'opération
-                for( int i =0; i < lOperation.Length; i++)
-                {
-                    if( Int32.TryParse(lOperation[i].ToString(), out lResultatOut) )
-                    {
-                        if( lAlpha.Length > 0)
-                        {
-                            lObjet.Operateur = retrouverOperateur(lAlpha);
-                            lAlpha = "";
-                        }
-
-                        lNombre += lResultatOut.ToString();
-                    }
-                    else
-                    {
-                        if (lNombre.Length > 0) {
-
-                            if (lObjet != null)
-                            {
-                                if (lObjet.Operande1 != null)
-                                {
-                                    lObjet.Operande2 = new Operande.Operande(Decimal.Parse(lNombre));
-                                }
-                                else
-                                {
-                                    lObjet.Operande1 = new Operande.Operande(Decimal.Parse(lNombre));
-                                }
-                            }
-                            else
-                            {
-                                lObjet = new Operation.Operation();
-                                lObjet.Operande1 = new Operande.Operande(Decimal.Parse(lNombre));
-                                lListe.Add(lObjet);
-                            }
-
-                            lNombre = "";
-                        }
-
-                        if( lObjet.Operande2 != null)
-                        {
-                            if( lListe.Count() > 0)
-                            {
-                                lObjet = new Operation.Operation();
-                                lObjet.Precedente = lListe[lListe.Count()];
-                                lListe[lListe.Count()].Suivante = lObjet;
-
-                                lListe.Add(lObjet);
-                            }
-                        }
-
-                        //on stock l'opérateur
-                        lAlpha += lOperation[i].ToString();
-                        lObjet.Operateur = retrouverOperateur(lAlpha);
-
-                        if (lObjet.Operateur != null) {
-                            //on regarde si l'opération précédente à une priorité supérieur    
-                            if (lListe.Count() > 0) {
-                                if (lObjet.Precedente.Operateur.Priorite < lObjet.Operateur.Priorite)
-                                {
-                                    lObjet.Operande1 = lObjet.Precedente.Operande2;
-                                    lObjet.Precedente.Operande2 = lObjet.va
-                                }
-                            }
-                        }
-
-                    } //fin else
-                } //fin for
-
-                if( lObjet.Operande2 == null)
-                {
-                    lObjet.Operande2 = new Operande.Operande(Decimal.Parse(lNombre));
-                }
-                lListe.Add(lObjet);
-
-                //On parcours la liste et on fait les calculs
-                foreach (var op in lListe)
-                {
-                    lRetour += (op.Operateur.calculer(op.Operande1, op.Operande2)).Valeur;
-                }
-
-            }
-            catch( Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            memoriserResultat(lRetour);
-            return lRetour;
-
-        }
-        */
         public Double calculer(String pCalcul)
         {
+            // appel du calculateur de la bibliothèque
             Calculateur calcul = new Calculateur();
-            return calcul.calculerOperation(pCalcul);
-            
+
+            // pour les erreurs ou les calculs impossibles
+            calcul.TraceErreur += Calcul_TraceErreur;
+
+            // on ajoute l'entrée du calcul dans l'historique
+            ajouterHistorique(pCalcul);
+
+            // on effectue le calcul
+            resultat = calcul.calculerOperation(pCalcul);
+
+            return resultat;   
         }
+
+        private void Calcul_TraceErreur(object sender, Calculateur.TraceErreurEventArgs e)
+        {
+            //this.mFenetre.afficherErreur(e.Message);
+            throw new ArgumentException(e.Message);
+        }
+
     }
 }
