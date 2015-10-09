@@ -8,14 +8,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+/// <summary>
+/// Projet Calculatrice
+/// </summary>
 namespace Calculatrice
 {
+    /// <summary>
+    /// GUI de la calculatrice
+    /// </summary>
     public partial class frmCalculatrice : Form
     {
 
         #region Définition
+        private const int MAXCAR = 32;
+
         private controleurCalculatrice mControleur;
         private int mPositionCurseur = 0;
+        private int nbCaractereSaisi = 0;
         private Font mPoliceInitiale;
         private bool resultat_affiche = false;
 
@@ -24,6 +33,9 @@ namespace Calculatrice
 
         #region Constructeurs
 
+        /// <summary>
+        /// Constructeur de la fenêtre
+        /// </summary>
         public frmCalculatrice()
         {
             InitializeComponent();
@@ -34,26 +46,59 @@ namespace Calculatrice
         #endregion
 
         #region Evénements
+
+        /// <summary>
+        /// Au chargement de l'application, on initialise le controleur
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void frmCalculatrice_Load(object sender, EventArgs e)
         {
             mControleur.initialiserFenetre();
+            btnEffacerTout.Focus();
         }
 
+        /// <summary>
+        /// Le bouton DEL permet d'effacer un caractère selon la position du curseur
+        /// dans la zone de saisie (zone supérieure)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnRetour_Click(object sender, EventArgs e)
         {
             effacerCaractere();
         }
 
+        /// <summary>
+        /// Le bouton AC permet d'effacer la zone de saisie et la zone de résultat
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnEffacerTout_Click(object sender, EventArgs e)
         {
             effacerTout();
         }
 
+        /// <summary>
+        /// Evénement lié à tous les boutons sauf DEL, AC, OFF, =, historique (flêches)
+        /// qui permet de traité l'affichage de ce qui est cliqué
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnEcrire_Click(object sender, EventArgs e)
         {
-            afficherValeur(sender);
+            if (nbCaractereSaisi < MAXCAR)
+                afficherValeur(sender);
+            else
+                Console.Beep();
         }
 
+        /// <summary>
+        /// Permet de contrôler la position du curseur lors d'un clic dans la zone de saisie (position visuel du curseur d'ecriture).
+        /// Si le curseur n'est pas à la fin, alors la saisie se fait à la suite de la position du curseur.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void txtSaisie_Click(object sender, EventArgs e)
         {
             mPositionCurseur = txtSaisie.SelectionStart;
@@ -64,13 +109,23 @@ namespace Calculatrice
                 enModification = true;
         }
 
+        /// <summary>
+        /// Permet de lancer le calcul et de l'afficher. Le curseur est alors positionné à la fin de la zone de saisie.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnEgal_Click(object sender, EventArgs e)
         {
             Double resultat = 0;
+            String calcul = "";
 
             try
             {
-                resultat = mControleur.calculer(txtSaisie.Text);
+                // on remplace tous les 'Ans' par le dernier résultat
+                calcul = txtSaisie.Text;
+                calcul = calcul.Replace("Ans", mControleur.recupererDernierResultat().ToString());
+
+                resultat = mControleur.calculer(calcul);
                 afficherResultat(resultat);
                 mPositionCurseur = txtSaisie.Text.Length;
 
@@ -83,25 +138,76 @@ namespace Calculatrice
             
         }
 
+        /// <summary>
+        /// Permet de quitter l'application Calculette
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnTermine_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
+        /// <summary>
+        /// Permet d'afficher l'historique des commandes dans la zone de saisie.
+        /// On remonte la liste de l'historique (vers le plus ancien).
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnAncien_Click(object sender, EventArgs e)
         {
-            String saisie = mControleur.recupererHistorique(false);
+            String saisie = mControleur.recupererHistorique(true);
 
             if( saisie != "" )
                 afficherSaisieHistorique(saisie);
         }
 
+        /// <summary>
+        /// Permet d'afficher l'historique des commandes dans la zone de saisie.
+        /// On descend la liste de l'historique (vers le plus récent)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnRecent_Click(object sender, EventArgs e)
         {
-            String saisie = mControleur.recupererHistorique(true);
+            String saisie = mControleur.recupererHistorique(false);
 
             if (saisie != "")
                 afficherSaisieHistorique(saisie);
+        }
+
+        /// <summary>
+        /// Permet de suivre la position du curseur lorsque l'utilisateur utilise les flèches pour déplacer 
+        /// visuellement le curseur dans la zone de saisie.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtSaisie_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Right && txtSaisie.SelectionStart == txtSaisie.Text.Length)
+                enModification = false;
+            else if (e.KeyData == Keys.Left)
+                enModification = true;
+        }
+
+        /// <summary>
+        /// Permet de faire les calculs trigonométriques en Radian
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnModeRadian_Click(object sender, EventArgs e)
+        {
+            txtMode.Text = "Rad";
+        }
+
+        /// <summary>
+        /// Permet de faire les calculs trigonométriques en Degré
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnModeDegre_Click(object sender, EventArgs e)
+        {
+            txtMode.Text = "Deg";
         }
 
         #endregion
@@ -112,6 +218,11 @@ namespace Calculatrice
 
         #region Methodes publiques
 
+        /// <summary>
+        /// Permet de modifier la fenêtre depuis le contrôleur
+        /// </summary>
+        /// <param name="pNom">Nom de la zone de texte à modifier</param>
+        /// <returns>Le composant zone de texte demandé</returns>
         public TextBox recupererTxtCtrl(String pNom)
         {
             TextBox txtCtrl = null;
@@ -130,15 +241,22 @@ namespace Calculatrice
 
         #region Méthodes privées
 
+        /// <summary>
+        /// Efface la zone de saisie et la zone de résultat
+        /// </summary>
         private void effacerTout()
         {
-            txtResultat.Text = "";
+            txtResultat.Text = "0";
             txtSaisie.Text = "";
             mPositionCurseur = 0;
 
+            resultat_affiche = false;
             txtResultat.Font = mPoliceInitiale;
         }
 
+        /// <summary>
+        /// Permet d'effacer le caractère juste après le curseur
+        /// </summary>
         private void effacerCaractere()
         {
             String TexteSaisiGauche = "";
@@ -161,25 +279,38 @@ namespace Calculatrice
             }
         }
 
+        /// <summary>
+        /// Permet d'effacer uniquement la zone de saisie.
+        /// </summary>
         private void effacerSaisie()
         {
             txtSaisie.Text = "";
         }
 
+        /// <summary>
+        /// Permet d'afficher l'historique des commandes.
+        /// Efface la zone de saisie et affiche la commande demandé.
+        /// </summary>
+        /// <param name="saisie"></param>
         private void afficherSaisieHistorique(String saisie)
         {
             effacerSaisie();
             txtSaisie.Text = saisie;
         }
 
+        /// <summary>
+        /// Fonction de traitement du bouton cliqué.
+        /// Permet de préparer les opérandes et les opérateurs pour affichage dans la zone de saisie.
+        /// </summary>
+        /// <param name="pBouton">Information sur le bouton cliqué</param>
         private void afficherValeur(Object pBouton)
         {
             Button lBouton = (Button)pBouton;
 
             // si resultat affiché, on prend la valeur et on l'affiche sur la saisie
-            if (!mControleur.estUnEntier(lBouton.Text) && txtResultat.Text.Length > 0 && !enModification )
+            if (!mControleur.estUnEntier(lBouton.Text) && resultat_affiche && !enModification )
             {
-                txtSaisie.Text = mControleur.recupererDernierResultat().ToString();
+                txtSaisie.Text = "Ans";
                 mPositionCurseur = txtSaisie.Text.Length;
             }
 
@@ -237,38 +368,6 @@ namespace Calculatrice
                     ajouterTexte("fact(");
                     break;
 
-                case "btnModeRadian":
-                    txtMode.Text = "Rad";
-                    break;
-
-                case "btnModeDegre":
-                    txtMode.Text = "Deg";
-                    break;
-
-                case "btnSigne":
-
-                    String lSaisieGauche;
-                    String lSaisieDroite;
-                    int lPositionInitiale;
-                    int valeur;
-
-                    lPositionInitiale = mPositionCurseur;
-
-                    for(int i = mPositionCurseur - 1; i > 0; i--)
-                    {
-                        if( !Int32.TryParse( txtSaisie.Text[i].ToString(), out valeur))
-                        {
-                            lSaisieGauche = txtSaisie.Text.Substring(0, i+1);
-                            lSaisieDroite = txtSaisie.Text.Substring(i+1);
-                            txtSaisie.Text = lSaisieGauche + "-" + lSaisieDroite;
-                            mPositionCurseur = lPositionInitiale + 1;
-
-                            break;
-                        }
-                        mPositionCurseur = i;
-                    }
-                    break;
-
                 case "btnPi":
                     ajouterTexte("Pi");
                     break;
@@ -303,25 +402,40 @@ namespace Calculatrice
             }
         }
 
+        /// <summary>
+        /// Permet d'afficher les informations dans la zone de saisie.
+        /// </summary>
+        /// <param name="pAjout">Chaîne à ajouter à la zone de saisie</param>
         private void ajouterTexte(String pAjout)
         {
             String TexteSaisiGauche = "";
             String TexteSaisiDroite = "";
 
+            // si aucune saisie
             if (txtSaisie.Text.Length == 0)
             {
+                nbCaractereSaisi = 0;
                 txtSaisie.Text = pAjout;
                 mPositionCurseur += pAjout.Length;
             }
             else
             {
+                // on ajoute à la position du curseur. On récupère donc le texte à gauche et à droite de la position du curseur
                 TexteSaisiGauche = txtSaisie.Text.Substring(0, mPositionCurseur);
                 TexteSaisiDroite = txtSaisie.Text.Substring(mPositionCurseur, txtSaisie.Text.Length - mPositionCurseur);
+                // on recompose le tout
                 txtSaisie.Text = TexteSaisiGauche + pAjout + TexteSaisiDroite;
+                // on décale la position du curseur (virtuel) du nombre de caractère ajouté
                 mPositionCurseur += pAjout.Length;
             }
+
+            nbCaractereSaisi += pAjout.Length;
         }
 
+        /// <summary>
+        /// Permet d'afficher un message dans la zone de résultat (erreur, info...)
+        /// </summary>
+        /// <param name="pMessage">Message à afficher</param>
         public void afficherErreur(String pMessage)
         {
             //Ecrire en plus petit
@@ -332,19 +446,16 @@ namespace Calculatrice
             txtResultat.Text = pMessage;
         }
 
+        /// <summary>
+        /// Permet d'afficher le résultat du calcul.
+        /// </summary>
+        /// <param name="pResultat"></param>
         private void afficherResultat(Double pResultat)
         {
-            txtResultat.Text = pResultat.ToString("G17");
+            // on transforme le double en texte avec une précision spécifique (G17)
+            txtResultat.Text = pResultat.ToString();
         }
 
         #endregion
-
-        private void txtSaisie_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyData == Keys.Right && txtSaisie.SelectionStart == txtSaisie.Text.Length)
-                enModification = false;
-            else if (e.KeyData == Keys.Left)
-                enModification = true;
-        }
     }
 }

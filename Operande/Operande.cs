@@ -1,7 +1,13 @@
 ﻿using System;
 
+/// <summary>
+/// Projet calculatrice
+/// </summary>
 namespace Calculatrice
 {
+    /// <summary>
+    /// Définie une opérande (sous forme de chaîne de caractères).
+    /// </summary>
     public class Operande
     {
 
@@ -16,18 +22,6 @@ namespace Calculatrice
         {
             this.Valeur = pValeur;
         }
-
-        void rendreNegatif()
-        {
-            this.Valeur = "-" + this.Valeur;
-        }
-
-        void rendrePositif()
-        {
-            this.Valeur = this.Valeur.Replace("-", "");
-        }
-
-
 
     }
 }

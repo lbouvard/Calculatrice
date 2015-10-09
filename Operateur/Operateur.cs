@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Calculatrice
 {
+    /// <summary>
+    /// Classe abstraite opérateur.
+    /// Définir la priorité et le calcul.
+    /// </summary>
     public abstract class Operateur
     {
         public int Priorite { get; set; }
@@ -13,6 +17,9 @@ namespace Calculatrice
         abstract public Operande calculer(Operande op1, Operande op2);
     }
 
+    /// <summary>
+    /// Génération de l'opérateur additionner
+    /// </summary>
     public class Addition : Operateur
     {
         public Addition()
@@ -25,7 +32,15 @@ namespace Calculatrice
             Operande lRetour = null;
             Double lResultat = 0;
 
-            lResultat = Double.Parse(pOp1.Valeur) + Double.Parse(pOp2.Valeur);
+            if (pOp2.Valeur.Contains("%"))
+            {
+                pOp2.Valeur = pOp2.Valeur.Substring(0, pOp2.Valeur.Length - 1);
+                lResultat = Double.Parse(pOp1.Valeur) + (Double.Parse(pOp1.Valeur) * Double.Parse(pOp2.Valeur) / 100);
+            }
+            else
+            {
+                lResultat = Double.Parse(pOp1.Valeur) + Double.Parse(pOp2.Valeur);
+            }
 
             lRetour = new Operande(lResultat.ToString("G17"));
 
@@ -33,6 +48,9 @@ namespace Calculatrice
         }
     }
 
+    /// <summary>
+    /// Génération de l'opérateur soustraire
+    /// </summary>
     public class Soustraction : Operateur
     {
         public Soustraction()
@@ -45,7 +63,16 @@ namespace Calculatrice
             Operande lRetour = null;
             Double lResultat = 0;
 
-            lResultat = Double.Parse(pOp1.Valeur) - Double.Parse(pOp2.Valeur);
+            // calcul du pourcentage
+            if (pOp2.Valeur.Contains("%"))
+            {
+                pOp2.Valeur = pOp2.Valeur.Substring(0, pOp2.Valeur.Length - 1);
+                lResultat = Double.Parse(pOp1.Valeur) - (Double.Parse(pOp1.Valeur) * Double.Parse(pOp2.Valeur) / 100);
+            }
+            else
+            {
+                lResultat = Double.Parse(pOp1.Valeur) - Double.Parse(pOp2.Valeur);
+            }
 
             lRetour = new Operande(lResultat.ToString("G17"));
 
@@ -53,6 +80,9 @@ namespace Calculatrice
         }
     }
 
+    /// <summary>
+    /// Génération de l'opérateur multiplier
+    /// </summary>
     public class Multiplication : Operateur
     {
         public Multiplication()
@@ -74,6 +104,9 @@ namespace Calculatrice
 
     }
 
+    /// <summary>
+    /// Génération de l'opérateur diviser
+    /// </summary>
     public class Division : Operateur
     {
         public Division()
@@ -89,17 +122,17 @@ namespace Calculatrice
             try
             {
                 lResultat = Double.Parse(pOp1.Valeur) / Double.Parse(pOp2.Valeur);
+
+                if( Double.IsInfinity(lResultat ))
+                {
+                    throw new ArgumentException("Division par zéro impossible");
+                }
+
                 lRetour = new Operande(lResultat.ToString("G17"));
-            }
-            catch(DivideByZeroException ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw new Exception("Division par zéro impossible");
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                lRetour = null;
+                throw new ArgumentException(ex.Message);
             }
 
             return lRetour;

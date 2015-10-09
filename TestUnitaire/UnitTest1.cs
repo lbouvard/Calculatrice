@@ -118,7 +118,7 @@ namespace TestUnitaire
         public void TestCosinusDeg()
         {
             Calculateur calcul = new Calculateur();
-            Assert.AreEqual(Math.Sqrt(2) / 2, calcul.calculerOperation("cos(45)"));
+            Assert.AreEqual(Math.Sqrt(2) / 2 + 5, calcul.calculerOperation("cos(45) + 5"));
         }
 
         [TestMethod]
@@ -230,7 +230,7 @@ namespace TestUnitaire
         public void TestPuissanceN()
         {
             Calculateur calcul = new Calculateur();
-            Assert.AreEqual(32, calcul.calculerOperation("2^(5)"));
+            Assert.AreEqual(-32, calcul.calculerOperation("-2^(5)"));
         }
 
         [TestMethod]

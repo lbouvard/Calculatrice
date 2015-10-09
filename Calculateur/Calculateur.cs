@@ -1,22 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+/// <summary>
+/// Projet Calculatrice
+/// </summary>
 namespace Calculatrice
 {
+    /// <summary>
+    /// Partie processeur
+    /// </summary>
     public class Calculateur
     {
         List<Operation> liste_op;
         String mode;
 
+        /// <summary>
+        /// Constructeur du processeur
+        /// </summary>
+        /// <param name="pMode">Degré (Deg) ou Radian (Rad) pour les calculs trigonomètrique</param>
         public Calculateur(String pMode = "Deg")
         {
             mode = pMode;
             liste_op = new List<Operation>();
         }
 
+        /// <summary>
+        /// Point d'entrée depuis une application qui utilise la bibliothèque.
+        /// Permet de faire le calcul
+        /// </summary>
+        /// <param name="calcul">Calcul a effectué</param>
+        /// <returns>Le résultat du calcul</returns>
         public Double calculerOperation(String calcul)
         {
             Double resultat = 0.0;
@@ -30,73 +43,100 @@ namespace Calculatrice
                     resultat = Double.Parse(calculerSousOperation(calcul, liste_op));
                 }
 
-                // vide la liste pour les prochains calcul
+                // vide la liste pour les prochains calculs
                 liste_op.Clear();
 
                 return resultat;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 liste_op.Clear();
-                return 0.0;
+
+                // remonter des messages à l'application principale
+                TraceErreurEventArgs err = new TraceErreurEventArgs();
+                err.Message = ex.Message;
+                TracerErreur(err);
             }
+
+            return 0;
         }
 
+        /// <summary>
+        /// Sous opération à effecuter (recursivité)
+        /// </summary>
+        /// <param name="calcul"></param>
+        /// <param name="liste"></param>
+        /// <returns></returns>
         private String calculerSousOperation(String calcul, List<Operation> liste)
         {
-            try
-            {
-                // on transforme la chaîne d'entrée en une liste d'opération
-                decomposerCalcul(calcul, liste);
-                // on contrôle la priorité pour les opérations en attente d'opérande 
-                verifierPriorite(liste);
-                // on trie la liste de façon à avoir les plus grande priorités au début
-                trierListe(liste);
-                // calcule de la liste
-                Calculer(liste);
+            // on transforme la chaîne d'entrée en une liste d'opération
+            decomposerCalcul(calcul, liste);
+            // on contrôle la priorité pour les opérations en attente d'opérande 
+            verifierPriorite(liste);
+            // on trie la liste de façon à avoir les plus grande priorités au début
+            trierListe(liste);
+            // calcule de la liste
+            calculer(liste);
 
-                // on récupère le résultat qui se trouve dans le dernier élément de la liste
-                return liste[liste.Count - 1].Resultat;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-
-                return "ERR";
-            }
+            // on récupère le résultat qui se trouve dans le dernier élément de la liste
+            return liste[liste.Count - 1].Resultat;
         }
 
+        /// <summary>
+        /// Permet de vérifier que toutes les parenthèses sont bien fermées
+        /// </summary>
+        /// <param name="calcul"></param>
+        /// <returns></returns>
         private bool verifierCalculEntree(String calcul)
         {
             int nbParenthese = 0;
             bool retour = true;
 
+            // on parcours tout le calcul
             foreach (char c in calcul)
             {
+                // on incrémente le compteur à chaque parenthèse ouvrante
                 if (c == '(')
                     nbParenthese++;
+                // on décrémente le compteur à chaque parenthèse fermante
                 else if (c == ')')
                     nbParenthese--;
             }
 
+            // si pas 0, le calcul n'est pas bon
             if (nbParenthese != 0)
                 retour = false;
 
             return retour;
         }
 
+        /// <summary>
+        /// Moteur de calcul
+        /// </summary>
+        /// <param name="calcul">Le calcul à effectuer</param>
+        /// <param name="liste">Liste des opérations intermédiaires</param>
         private void decomposerCalcul(String calcul, List<Operation> liste)
         {
             // on supprime tous les espaces
             String donnees = calcul.Replace(" ", "");
+            // on remplace Pi par sa valeur
             donnees = donnees.Replace("Pi", Math.PI.ToString("G17"));
 
+            if( donnees.Length == 0)
+            {
+                throw new ArgumentException("Aucun calcul disponible");
+            }
+
+            // buffer pour les opérandes
             String operande = "";
+            // buffer pour les opérateurs
             String operateur = "";
+            // buffer pour chaque caractère de l'opération
             Char c;
 
+            // Gestion d'une opération simple
             Operation op = null;
+            // Gestion de l'opération qui suit une opération remplie ou en attente du résultat
             Operation suiv = null;
 
             bool numerique = true;
@@ -124,8 +164,22 @@ namespace Calculatrice
                     numerique = true;
                 }
 
-                if (char.IsDigit(c) || c == ',')
+                if (char.IsDigit(c) || c == ',' || c == '%')
                 {
+                    // on verouille le pourcentage pour l'addition et la soustraction
+                    if( c == '%')
+                    {
+                        if (op != null)
+                        {
+                            if ( !(op.Operateur is Addition || op.Operateur is Soustraction) )
+                            {
+                                throw new ArgumentException("Seuls (+,-) disponibles avec %");
+                            }
+                        }
+                        else
+                            throw new ArgumentException("Seuls (+,-) disponibles avec %");
+                    }
+
                     //si on avait un caractère sur le caractère précédent
                     if (!numerique)
                     {
@@ -133,10 +187,6 @@ namespace Calculatrice
                         {
                             op.Operateur = retrouverOperateur(operateur);
                             operateur = "";
-                        }
-                        else
-                        {
-                            // on ne fait rien
                         }
                     }
                     //nombre
@@ -149,7 +199,7 @@ namespace Calculatrice
                     String operateurSpe = "";
                     bool operateurTrouve = true;
 
-                    // opérateur spécifique
+                    // opérateur spécifique a retrouver
                     switch (c)
                     {
                         case 'c':
@@ -233,6 +283,7 @@ namespace Calculatrice
                             break;
                     }
 
+                    // si on est en présence d'un opérateur spécifique
                     if (operateurTrouve)
                     {
                         // on calcul par récurrence le contenu d'un couple de parenthèse
@@ -272,9 +323,18 @@ namespace Calculatrice
                         if (op == null)
                         {
                             op = new Operation();
-                            op.Resultat = resultat;
 
-                            liste.Add(op);
+                            // opération à la suite
+                            if (i < donnees.Length)
+                            {
+                                op.Operande1 = new Operande(resultat);
+                                c = donnees[i];
+                            }
+                            else
+                            {
+                                op.Resultat = resultat;
+                                liste.Add(op);
+                            }
                         }
                         else
                         {
@@ -466,6 +526,10 @@ namespace Calculatrice
             }
         }
 
+        /// <summary>
+        /// Verification des prioriété et réorganisation des sous calcul
+        /// </summary>
+        /// <param name="liste">Liste des opérations simple</param>
         private void verifierPriorite(List<Operation> liste)
         {
             // seulement si on a plus d'un élément
@@ -483,12 +547,17 @@ namespace Calculatrice
             }
         }
 
+        /// <summary>
+        /// Trie selon la priorité
+        /// </summary>
+        /// <param name="liste">liste des opérations intermédiaires</param>
         private void trierListe(List<Operation> liste)
         {
             Operation op;
             int priorite;
             int indice;
 
+            // Permet de classer les opérations de la plus grande priorité à la plus faible
             for (int i = 0; i < liste.Count - 1; i++)
             {
                 //op = liste_op[i];
@@ -515,7 +584,11 @@ namespace Calculatrice
             }
         }
 
-        private void Calculer(List<Operation> liste)
+        /// <summary>
+        /// Permet de calculer les opérations élémentaires
+        /// </summary>
+        /// <param name="liste">lise des opérations élémentaires</param>
+        private void calculer(List<Operation> liste)
         {
             foreach (Operation op in liste)
             {
@@ -555,6 +628,13 @@ namespace Calculatrice
             }
         }
 
+        /// <summary>
+        /// Permet de faire un calcul indépendamment des opérations élémentaires (dans la liste)
+        /// </summary>
+        /// <param name="operande1">Opérande 1</param>
+        /// <param name="operande2">Opérande 2</param>
+        /// <param name="operateur">Opérateur</param>
+        /// <returns>Résultat sous forme de chaine de caractères</returns>
         private String calculExterne(String operande1, String operande2, Operateur operateur)
         {
             try
@@ -581,6 +661,13 @@ namespace Calculatrice
             }
         }
 
+        /// <summary>
+        /// Calcul de puissance sans intermédiaire (sans liste d'opérations élémentaires)
+        /// </summary>
+        /// <param name="operande1">Operande 1</param>
+        /// <param name="operation">Calcul possible dans l'exposant</param>
+        /// <param name="indice">Position de la parenthèse ouvrante (cas d'un calcul dans l'exposant)</param>
+        /// <returns>Resultat sous forme de chaîne de caractères</returns>
         private String calculPuissance(String operande1, ref String operation, int indice)
         {
             String retour = "";
@@ -619,6 +706,11 @@ namespace Calculatrice
             return i;
         }
 
+        /// <summary>
+        /// Permet de renvoyer la bonne classe selon le texte d'un opérateur
+        /// </summary>
+        /// <param name="pChaine">Chaine de l'opérateur</param>
+        /// <returns>la classe correspondante</returns>
         private Operateur retrouverOperateur(String pChaine)
         {
             Operateur lRetour = null;
@@ -694,7 +786,6 @@ namespace Calculatrice
 
             return lRetour;
         }
-
 
         // trace à remonter au contrôleur appelant
         public event EventHandler<TraceErreurEventArgs> TraceErreur;
