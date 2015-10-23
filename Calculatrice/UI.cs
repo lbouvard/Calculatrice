@@ -67,6 +67,9 @@ namespace Calculatrice
         private void btnRetour_Click(object sender, EventArgs e)
         {
             effacerCaractere();
+
+            if (nbCaractereSaisi > 0)
+                nbCaractereSaisi--;
         }
 
         /// <summary>
@@ -77,6 +80,7 @@ namespace Calculatrice
         private void btnEffacerTout_Click(object sender, EventArgs e)
         {
             effacerTout();
+            nbCaractereSaisi = 0;
         }
 
         /// <summary>
@@ -310,8 +314,40 @@ namespace Calculatrice
             // si resultat affiché, on prend la valeur et on l'affiche sur la saisie
             if (!mControleur.estUnEntier(lBouton.Text) && resultat_affiche && !enModification )
             {
-                txtSaisie.Text = "Ans";
-                mPositionCurseur = txtSaisie.Text.Length;
+                String opeComplexe = estUnOperateurComplexe(lBouton.Name);
+
+                if( opeComplexe == "" )
+                {
+                    txtSaisie.Text = "Ans";
+                    mPositionCurseur = txtSaisie.Text.Length;
+                }
+                else
+                {
+                    //on affiche déjà l'opération avec "Ans" et on finie la fonction
+                    if (opeComplexe != "Ans" && opeComplexe != "Pi" && opeComplexe != "Err")
+                    {
+                        txtSaisie.Text = opeComplexe + "Ans";
+                    }
+                    else
+                    {
+                        if (opeComplexe == "Ans" || opeComplexe == "Err" )
+                        {
+                            txtSaisie.Text = "Ans";
+                        }
+                        else
+                        {
+                            txtSaisie.Text = "Pi";
+                        }
+                    }
+                    mPositionCurseur = txtSaisie.Text.Length;
+
+                    //nouvelle saisie donc on supprimer le contenu du résultat
+                    resultat_affiche = false;
+                    txtResultat.Text = "";
+
+                    return;
+                }
+                
             }
 
             // si on a un resultat affiché, on supprime le resultat
@@ -449,11 +485,84 @@ namespace Calculatrice
         /// <summary>
         /// Permet d'afficher le résultat du calcul.
         /// </summary>
-        /// <param name="pResultat"></param>
+        /// <param name="pResultat">Résultat double à afficher</param>
         private void afficherResultat(Double pResultat)
         {
             // on transforme le double en texte avec une précision spécifique (G17)
             txtResultat.Text = pResultat.ToString();
+        }
+
+        /// <summary>
+        /// Permet de vérifier que l'opérateur demandé lors d'une nouvelle saisie doit précéder le "Ans"
+        /// </summary>
+        /// <param name="operateur">Nom du bouton opération</param>
+        /// <returns></returns>
+        private String estUnOperateurComplexe(String operateur)
+        {
+            String retour = "";
+
+            switch (operateur)
+            {
+
+                case "btnPuissance2":
+                    retour = "carre(";
+                    break;
+
+                case "btnPuissance3":
+                    retour = "cube(";
+                    break;
+
+                case "btnCos":
+                    retour = "cos(";
+                    break;
+
+                case "btnSin":
+                    retour = "sin(";
+                    break;
+
+                case "btnTan":
+                    retour = "tan(";
+                    break;
+
+                case "btnLog":
+                    retour = "log(";
+                    break;
+
+                case "btnLogNeperien":
+                    retour = "ln(";
+                    break;
+
+                case "btnExp":
+                    retour = "powe(";
+                    break;
+
+                case "btnRacine":
+                    retour = "sqrt(";
+                    break;
+
+                case "btnFactoriel":
+                    retour = "fact(";
+                    break;
+
+                case "btnDernierResultat":
+                    retour = "Ans";
+                    break;
+
+                case "btnPi":
+                    retour = "Pi";
+                    break;
+
+                case "btnParentheseOuvrante":
+                    retour = "(";
+                    break;
+
+                //aucune utilité, on ignore la saisie
+                case "btnParentheseFermante":
+                    retour = "Err";
+                    break;
+            }
+
+            return retour;
         }
 
         #endregion
